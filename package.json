@@ -1,0 +1,19 @@
+{
+  "name": "todos-postman-pipelines",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "newman run postman_collection.json",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "newman": "^6.1.3"
+  }
+}
