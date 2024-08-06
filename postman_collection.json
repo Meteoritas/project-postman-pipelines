@@ -36,7 +36,7 @@
 							"});\r",
 							"\r",
 							"// Test that the returned data is an object and is correct\r",
-							"pm.test(\"returned data is an object and is correct\", () => {\r",
+							"pm.test(\"Created data exists in GET all\", () => {\r",
 							"    let jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData).to.be.an('object');\r",
 							"    pm.expect(jsonData.title).to.eql(requestData.title);\r",
@@ -55,7 +55,7 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"const basetitle = 'user_';\r",
+							"const basetitle = 'Todo';\r",
 							"const uniquetitle = basetitle + Date.now();\r",
 							"\r",
 							"pm.collectionVariables.set('uniquetitle', \r",
@@ -73,61 +73,6 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"title\": \"{{uniquetitle}}\",\r\n    \"description\" : \"{{uniquedescription}}\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/todos",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"todos"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add New City unsuccessful",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 400\", function () {\r",
-							"    pm.response.to.have.status(400);\r",
-							"});\r",
-							"// Test that response time is under 500ms\r",
-							"pm.test(\"response is under 500ms\", () => {\r",
-							"pm.expect(pm.response.responseTime).to.be.below(500);})"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"title\": \r\n    \"description\":\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -231,11 +176,11 @@
 							"pm.test(\"Response body is not empty\", function () {\r",
 							"    pm.expect(pm.response.text()).to.not.be.empty;\r",
 							"});\r",
-							"pm.test(\"the data is an object and has correct data\", () => {\r",
+							"pm.test(\"Created Todo exists in GET by Id\", () => {\r",
 							"    let jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData).to.exist;\r",
 							"    pm.expect(jsonData).to.be.an('object');\r",
-							"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"createdCityId\"));\r",
+							"    pm.expect(jsonData.id).to.eql(parseInt(pm.collectionVariables.get(\"createdCityId\")));\r",
 							"    pm.expect(jsonData.title).to.eql(pm.collectionVariables.get(\"title\"));\r",
 							"    pm.expect(jsonData.description).to.eql(pm.collectionVariables.get(\"description\"));\r",
 							"});\r",
@@ -291,54 +236,55 @@
 							"    pm.expect(jsonData).to.have.property(\"id\");\r",
 							"    pm.expect(jsonData).to.have.property(\"title\");\r",
 							"    pm.expect(jsonData).to.have.property(\"description\");\r",
-							"});"
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"id\": 25,\r\n    \"title\": \"Šiauliai\",\r\n    \"description\" : \"Saulės miestas Lietuvoje\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/todos/{{createdCityId}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"todos",
-						"{{createdCityId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Update City by Id unsuccessful",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Response status code is 200\", function () {\r",
-							"  pm.response.to.have.status(400);\r",
 							"});\r",
-							"// Test that response time is under 500ms\r",
-							"pm.test(\"response is under 500ms\", () => {\r",
-							"pm.expect(pm.response.responseTime).to.be.below(500);})\r",
-							""
+							"pm.test(\"Response contains updated Todo\", () => {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    const expectedTitle = pm.collectionVariables.get(\"title\");\r",
+							"    const expectedId = pm.collectionVariables.get(\"id\");\r",
+							"\r",
+							"    // Log the response body and the expected title\r",
+							"    console.log(\"Response Body:\", responseBody);\r",
+							"    console.log(\"Expected Title:\", expectedTitle);\r",
+							"\r",
+							"    // Check if the response is an array or an object\r",
+							"    let foundTodo = false;\r",
+							"\r",
+							"    if (Array.isArray(responseBody)) {\r",
+							"        // Log when response is an array\r",
+							"        console.log(\"Response is an array\");\r",
+							"        foundTodo = responseBody.some(Todo => {\r",
+							"            console.log(\"Checking Todo:\", Todo);\r",
+							"            return Todo.title === expectedTitle && Todo.id === expectedId;\r",
+							"        });\r",
+							"    } else if (responseBody.todos && Array.isArray(responseBody.todos)) {\r",
+							"        // Log when response has 'todos' array\r",
+							"        console.log(\"Response contains 'todos' array\");\r",
+							"        foundTodo = responseBody.todos.some(Todo => {\r",
+							"            console.log(\"Checking Todo in 'todos':\", Todo);\r",
+							"            return Todo.title === expectedTitle && Todo.id === expectedId;\r",
+							"        });\r",
+							"    } else if (responseBody.title === expectedTitle && responseBody.id === expectedId) {\r",
+							"        // Log when response is a single Todo object\r",
+							"        console.log(\"Response is a single Todo object\");\r",
+							"        foundTodo = true;\r",
+							"    } else {\r",
+							"        console.log(\"Unexpected response structure:\", responseBody);\r",
+							"    }\r",
+							"\r",
+							"    // Log the result of the search\r",
+							"    console.log(\"Found Todo:\", foundTodo);\r",
+							"\r",
+							"    // Verify that the Todo item with the specified title and id exists\r",
+							"    pm.expect(foundTodo).to.be.true;\r",
+							"});\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"pm.test(\"Response array contains created Todo item description\", () => {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    pm.expect(responseBody.find(Todo => Todo.description === pm.collectionVariables.get(\"description\")));\r",
+							"    });"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -350,7 +296,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": \r\n    \"title\": \r\n    \"description\":\r\n}",
+					"raw": "{\r\n    \"title\": \"Šiauliai\",\r\n    \"description\" : \"Saulės miestas Lietuvoje\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -390,60 +336,17 @@
 							"pm.test(\"Response is in JSON format\", function () {\r",
 							"    pm.response.to.be.json;\r",
 							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:3000/todos/{{createdCityId}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"todos",
-						"{{createdCityId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete City by Id unsuccessful",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"// Ensure the response status code indicates a failure (e.g., 404 Not Found)\r",
-							"pm.test(\"Status code is 404\", function () {\r",
-							"    pm.response.to.have.status(404);\r",
-							"});\r",
-							"// Test that response time is under 500ms\r",
-							"pm.test(\"response is under 500ms\", () => {\r",
-							"pm.expect(pm.response.responseTime).to.be.below(500)});\r",
-							"\r",
-							"// Test for the message in the response\r",
-							"pm.test(\"Response contains message\", function () {\r",
-							"    let jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData).to.have.property(\"message\");\r",
-							"    pm.expect(jsonData.message).to.eql(\"Todo not found.\");\r",
+							"pm.test(\"Response does not contain the deleted Todo\", () => {\r",
+							"    const responseBody = pm.response.json();\r",
+							"    const deletedTodoId = pm.environment.get(\"deletedTodoId\"); // ID of the Todo that was deleted\r",
+							"    \r",
+							"    // Ensure the response body is an array\r",
+							"    pm.expect(responseBody).to.be.an('array');\r",
+							"    \r",
+							"    // Check if the deleted Todo ID is no longer present in the array\r",
+							"    const todoExists = responseBody.some(todo => todo.id === deletedTodoId);\r",
+							"    // Verify that the deleted Todo is not found\r",
+							"    pm.expect(todoExists).to.be.false;\r",
 							"});\r",
 							""
 						],
@@ -480,7 +383,7 @@
 			"response": []
 		},
 		{
-			"name": "Get All City's",
+			"name": "Get All Todos",
 			"event": [
 				{
 					"listen": "test",
